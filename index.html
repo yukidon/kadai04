@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>課題4　商品データベース</title>
+</head>
+<body>
+
+<!-- コンテンツ表示画面 -->
+
+<div>
+    <div> メーカー：<input type="text" id="maker"> </div>
+    <div> 商品名：<input type="text" id="item"> </div>
+    <div> JAN：<input type="text" id="jan"> </div>
+    <div> 入数：<input type="text" id="lot"> </div>
+    <div> 在庫数：<input type="text" id="quantity"> </div>
+    <div>備考：<textarea id="text" cols="30" rows="10"></textarea></div>
+        <button id="send" type="button">登録する</button>
+        <button id="remove" type="button">削除する</button>
+
+    <div id="output"></div>
+</div>
+<!--/ コンテンツ表示画面 -->
+
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- JQuery -->
+
+
+<!--** 以下Firebase **-->
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      set,
+      onChildAdded,
+      remove,
+      onChildRemoved,
+    } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+    //別送
+    };
+
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app); //RealtimeDBに接続
+const dbRef = ref(db,"itemDatabase"); //RealtimeDB内の"itemDatabase"を使う
+
+$("#send").on("click", function () {
+
+        const maker = $('#maker').val();
+        const item = $('#item').val();
+        const jan = $('#jan').val();
+        const lot = $('#lot').val();
+        const quantity = $('#quantity').val();
+        const text = $('#text').val();
+
+        const msg = {
+            maker: maker,
+            item: item,
+            jan: jan,
+            lot: lot,
+            quantity: quantity,
+            text: text,
+
+        }
+
+        const newPostRef = push(dbRef);
+        set(newPostRef, msg);
+
+        $('#maker').val("");
+        $('#item').val("");
+        $('#jan').val("");
+        $('#lot').val("");
+        $('#quantity').val("");
+        $('#text').val("");
+
+        // この下は消さない
+      });
+
+onChildAdded(dbRef, function (data) {
+    const msg = data.val();
+    //console.log(msg, "dataを取得");
+
+    let html = `
+    <tr>
+        <th>メーカー</th>
+        <td>${msg.maker}</td>
+    </tr>
+    <tr>
+        <th>商品名</th>
+        <td>${msg.item}</td>
+    </tr>
+    <tr>
+        <th>JAN</th>
+        <td>${msg.jan}</td>
+    </tr>
+    <tr>
+        <th>入り数</th>
+        <td>${msg.lot}</td>
+    </tr>
+    <tr>
+        <th>在庫数</th>
+        <td>${msg.quantity}</td>
+    </tr>
+    <tr>
+        <th>備考</th>
+        <td>${msg.text}</td>
+    </tr><br>
+    `;
+
+
+    $("#output").append(html);
+});
+
+$("#remove").on("click", function () {
+
+    remove(dbRef);
+    alert("データを削除しました")
+    location.reload();
+
+    });
+
+
+
+
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
